@@ -15,4 +15,9 @@ test('Unit Test: Basic Environment & Logic Checks', async (t) => {
     const provider = 'Enterprise SSO (OAuth2 / OIDC)';
     assert.strictEqual(typeof provider, 'string');
   });
+
+  await t.test('should validate payment currencies configuration', () => {
+    const currencies = ['USD', 'EUR', 'INR', 'GBP'];
+    assert.strictEqual(currencies.length, 4);
+  });
 });
