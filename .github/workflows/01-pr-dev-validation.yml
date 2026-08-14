@@ -1,0 +1,43 @@
+name: "01 - CI: Pull Request Validation (dev)"
+
+on:
+  pull_request:
+    branches:
+      - dev
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+concurrency:
+  group: pr-dev-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-pr:
+    name: "Lint, Unit Test & Build Check"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Code Style & Lint Check
+        run: npm run lint --if-present
+
+      - name: Run Unit Tests with Coverage
+        run: npm run test:unit --if-present
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Security Vulnerability Audit
+        run: npm audit --audit-level=high --omit=dev || true

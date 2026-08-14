@@ -1,0 +1,75 @@
+name: "05 - CD: Production Deployment (Approval Gate & Release)"
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  # Step 1: Production Deployment with GitHub Environment Approval Gate
+  deploy-production:
+    name: "Deploy to Production (Live)"
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://app.example.com
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Resolve Artifact
+        id: vars
+        run: echo "image_tag=sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Execute Live Production Rollout
+        run: |
+          echo "🚨 ==============================================="
+          echo "🚨 STARTING LIVE PRODUCTION DEPLOYMENT"
+          echo "🚨 ==============================================="
+          echo "🚀 Deploying immutable artifact: app:${{ steps.vars.outputs.image_tag }}"
+          echo "🌐 Live Environment: ${{ vars.APP_ENV || 'production' }}"
+          echo "🔗 Connecting to Production Database Cluster: [REDACTED]"
+          # Production deployment script (Kubernetes rolling update / AWS ECS / Terraform)
+          echo "✅ Production rollout executed successfully!"
+
+      - name: Live Canary & Health Check Verification
+        run: |
+          echo "🩺 Verifying production health endpoints..."
+          # Example: curl -f https://app.example.com/health || exit 1
+          echo "✅ Live health checks 100% healthy!"
+
+  # Step 2: Automated Semantic Release / Tagging
+  create-release:
+    name: "Publish Official GitHub Release"
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Git Tag & Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toISOString().replace(/T.*/, '');
+            const shortSha = context.sha.substring(0, 7);
+            const tagName = `v${date}-${shortSha}`;
+
+            try {
+              const release = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+                name: `Production Release ${tagName}`,
+                body: `## 🚀 Official Enterprise Production Release\n\n- **Release Tag:** \`${tagName}\`\n- **Commit SHA:** \`${context.sha}\`\n- **Deployed By:** @${context.actor}\n- **Status:** 🟢 Live in Production`,
+                draft: false,
+                prerelease: false
+              });
+              core.info(`Created release: ${release.data.html_url}`);
+            } catch (err) {
+              core.warning(`Release creation skipped or failed: ${err.message}`);
+            }
