@@ -35,6 +35,18 @@ export function createServer() {
       );
     }
 
+    if (url.pathname === '/api/payments') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          gateway: 'Stripe Enterprise / Adyen',
+          supportedCurrencies: ['USD', 'EUR', 'INR', 'GBP'],
+          status: 'ACTIVE',
+          environment: APP_ENV
+        }, null, 2)
+      );
+    }
+
     if (url.pathname === '/api/info') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
