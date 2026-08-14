@@ -47,11 +47,20 @@ jobs:
             }
 
             if (!isValid) {
+              // 1. Post comment explaining the governance violation
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: failureReason
+                body: failureReason + "\n\n🔒 **Action:** This pull request has been automatically closed to enforce branch governance."
+              });
+
+              // 2. Automatically CLOSE the Pull Request to completely prevent merging
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                state: 'closed'
               });
               
               core.setFailed(failureReason);
