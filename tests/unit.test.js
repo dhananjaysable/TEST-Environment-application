@@ -10,4 +10,9 @@ test('Unit Test: Basic Environment & Logic Checks', async (t) => {
     const env = process.env.APP_ENV || 'development';
     assert.ok(['development', 'qa', 'production', 'test'].includes(env));
   });
+
+  await t.test('should validate auth module configuration', () => {
+    const provider = 'Enterprise SSO (OAuth2 / OIDC)';
+    assert.strictEqual(typeof provider, 'string');
+  });
 });

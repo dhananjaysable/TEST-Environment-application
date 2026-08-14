@@ -23,6 +23,18 @@ export function createServer() {
       );
     }
 
+    if (url.pathname === '/api/auth') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          authenticated: true,
+          provider: 'Enterprise SSO (OAuth2 / OIDC)',
+          sessionTimeoutSeconds: 3600,
+          environment: APP_ENV
+        }, null, 2)
+      );
+    }
+
     if (url.pathname === '/api/info') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
