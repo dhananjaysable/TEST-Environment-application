@@ -63,19 +63,21 @@ Top engineering organizations (e.g., Google, Netflix, Amazon, Meta) solve multi-
 
 ## 2. Branch Governance & Access Control Matrix
 
-| Branch | Target Environment | Who Can Open PRs? | Required Approvals | Required Status Checks | Who Can Merge / Bypass? |
-|---|---|---|---|---|---|
-| **`feature/*`** | Local / Ephemeral | Developers | N/A | Local pre-commit hooks | Developers |
-| **`dev`** | **Development** | All Developers | 1 Peer Approval | Lint + Unit Tests + SAST Scan | Any Developer |
-| **`qa`** | **QA / Staging** | Automated Bot or QA Leads | 1 QA Lead Approval | Dev Deployment Status + Smoke Tests | `qa-team` or `release-managers` |
-| **`main`** | **Production** | Release Managers / CI Bot | 2 Approvals (Eng Lead + Security) | QA Sign-off + Security Scan | `release-managers` only |
+| Branch          | Target Environment | Who Can Open PRs?         | Required Approvals                | Required Status Checks              | Who Can Merge / Bypass?         |
+| --------------- | ------------------ | ------------------------- | --------------------------------- | ----------------------------------- | ------------------------------- |
+| **`feature/*`** | Local / Ephemeral  | Developers                | N/A                               | Local pre-commit hooks              | Developers                      |
+| **`dev`**       | **Development**    | All Developers            | 1 Peer Approval                   | Lint + Unit Tests + SAST Scan       | Any Developer                   |
+| **`qa`**        | **QA / Staging**   | Automated Bot or QA Leads | 1 QA Lead Approval                | Dev Deployment Status + Smoke Tests | `qa-team` or `release-managers` |
+| **`main`**      | **Production**     | Release Managers / CI Bot | 2 Approvals (Eng Lead + Security) | QA Sign-off + Security Scan         | `release-managers` only         |
 
 ---
 
 ## 3. Step-by-Step GitHub Configuration Guide
 
 ### A. Organization Teams
+
 Go to your **GitHub Organization $\rightarrow$ Teams** and create:
+
 - **`engineers`**: All software developers (Push access to feature branches).
 - **`qa-team`**: QA engineers and SDETs (Reviewers for `qa` environment).
 - **`release-managers`**: DevOps and Tech Leads (Reviewers for `production` environment).
@@ -87,6 +89,7 @@ Go to your **GitHub Organization $\rightarrow$ Teams** and create:
 Navigate to **Repo Settings $\rightarrow$ Rules $\rightarrow$ Rulesets**:
 
 #### Rule 1: Protect `main` (Production)
+
 - **Target branches**: Include `refs/heads/main`
 - **Restrictions**:
   - Check **Restrict deletions** and **Restrict force pushes**.
@@ -100,6 +103,7 @@ Navigate to **Repo Settings $\rightarrow$ Rules $\rightarrow$ Rulesets**:
   - **Bypass list**: Add only the `release-managers` team or CI service bot with "Always allow".
 
 #### Rule 2: Protect `qa` (QA/Staging)
+
 - **Target branches**: Include `refs/heads/qa`
 - **Restrictions**:
   - Check **Require a pull request before merging**:
@@ -110,6 +114,7 @@ Navigate to **Repo Settings $\rightarrow$ Rules $\rightarrow$ Rulesets**:
   - **Bypass list**: Add `qa-team` and `release-managers`.
 
 #### Rule 3: Protect `dev` (Development)
+
 - **Target branches**: Include `refs/heads/dev`
 - **Restrictions**:
   - Check **Require a pull request before merging**:
@@ -208,6 +213,7 @@ This repository includes turnkey GitHub Actions workflows:
 ## 6. Daily Developer & Release Workflow
 
 ### For Developers:
+
 1. Create feature branch: `git checkout -b feature/auth-module dev`
 2. Write code, test locally.
 3. Open PR: `feature/auth-module ➔ dev`
@@ -215,6 +221,7 @@ This repository includes turnkey GitHub Actions workflows:
 5. Merge PR into `dev`. Your work is now live on Dev environment.
 
 ### For QA Leads:
+
 1. A Promotion PR (`dev ➔ qa`) is created automatically by GitHub Actions.
 2. Review the changelog and QA ticket IDs.
 3. Approve and merge into `qa`.
@@ -222,8 +229,11 @@ This repository includes turnkey GitHub Actions workflows:
 5. Perform manual exploratory testing.
 
 ### For Release Managers:
+
 1. An automated Release PR (`qa ➔ main`) is created.
 2. Review final release readiness and audit report.
 3. Merge PR into `main`.
 4. Production workflow pauses $\rightarrow$ Release Manager clicks **"Review deployments" $\rightarrow$ "Approve"** in GitHub Actions.
 5. Application goes live to production customers.
+
+Dhananjay Sable
